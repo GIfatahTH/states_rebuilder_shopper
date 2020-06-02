@@ -103,10 +103,10 @@ packages:
   states_rebuilder:
     dependency: "direct main"
     description:
-      path: "E:\\flutter\\_libraries\\_states_rebuilder\\states_rebuilder\\states_rebuilder_package"
-      relative: false
-    source: path
-    version: "2.1.0"
+      name: states_rebuilder
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.0"
   stream_channel:
     dependency: transitive
     description:
@@ -134,7 +134,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.15"
+    version: "0.2.16"
   typed_data:
     dependency: transitive
     description:

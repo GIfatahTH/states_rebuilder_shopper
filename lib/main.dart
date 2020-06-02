@@ -6,7 +6,7 @@ import 'models/cart.dart';
 import 'models/catalog.dart';
 import 'repository/catalog_repository.dart';
 import 'screen/cart.dart';
-import 'screen/cataglog.dart';
+import 'screen/catalog.dart';
 
 void main() {
   runApp(MyApp());

@@ -20,11 +20,9 @@ class CatalogRepository {
     'Bit Shift',
     'Currying',
   ];
-  bool _throw = true;
   Future<List<Item>> fetchItems() async {
     await Future.delayed(Duration(seconds: 2));
-    if (Random().nextBool() && _throw) {
-      _throw = false;
+    if (Random().nextBool()) {
       throw Exception('Network Exception');
     }
 
@@ -32,7 +30,7 @@ class CatalogRepository {
   }
 
   Future<bool> removeItem(Item item) async {
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration(seconds: 2));
     if (Random().nextBool()) throw Exception('Network Exception');
     itemNames.remove(item.name);
     return true;

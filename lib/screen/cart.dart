@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:states_rebuilder_shopper/models/cart.dart';
 
+final _theme = RM.theme;
+
 class MyCart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -31,10 +33,9 @@ class MyCart extends StatelessWidget {
 
 class _CartList extends StatelessWidget {
   final cart = IN.get<CartState>();
+  final itemNameStyle = _theme.textTheme.headline6;
   @override
   Widget build(BuildContext context) {
-    final itemNameStyle = Theme.of(context).textTheme.headline6;
-
     return ListView.builder(
       itemCount: cart.items.length,
       itemBuilder: (context, index) => ListTile(
@@ -50,29 +51,39 @@ class _CartList extends StatelessWidget {
 
 class _CartTotal extends StatelessWidget {
   final cart = IN.get<CartState>();
+  final hugeStyle = _theme.textTheme.headline1.copyWith(fontSize: 48);
   @override
   Widget build(BuildContext context) {
-    var hugeStyle =
-        Theme.of(context).textTheme.headline1.copyWith(fontSize: 48);
-
     return SizedBox(
       height: 200,
       child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('\$${cart.totalPrice}', style: hugeStyle),
-            SizedBox(width: 24),
-            FlatButton(
-              onPressed: () {
-                Scaffold.of(context).showSnackBar(
-                    SnackBar(content: Text('Buying not supported yet.')));
-              },
-              color: Colors.white,
-              child: Text('BUY'),
-            ),
-          ],
-        ),
+        child: StateBuilder<int>(
+            observe: () => RM.create(cart.totalPrice),
+            builder: (context, totalPriceRM) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('\$${totalPriceRM.state}', style: hugeStyle),
+                  SizedBox(width: 24),
+                  FlatButton(
+                    onPressed: () {
+                      totalPriceRM.setState((s) {
+                        // some api coll ...
+                        throw Exception('Buying not supported yet.');
+                      }, onError: (context, error) {
+                        RM.scaffold.showSnackBar(
+                          SnackBar(
+                            content: Text('${error.message}'),
+                          ),
+                        );
+                      });
+                    },
+                    color: Colors.white,
+                    child: Text('BUY'),
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }

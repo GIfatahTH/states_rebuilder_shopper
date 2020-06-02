@@ -3,6 +3,13 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:states_rebuilder_shopper/models/cart.dart';
 import 'package:states_rebuilder_shopper/models/catalog.dart';
 
+//define a global final private variable as get the theme without the context
+//The will result in a performance increase, because theme are often used inside
+//build method which may be executed each frame.
+//So if you use Theme.of(context), it will be executed 60 times per second (animation).
+//But if you use the global theme variable, the method will be executed one time.
+final _theme = RM.theme;
+
 class MyCatalog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -26,10 +33,10 @@ class MyCatalog extends StatelessWidget {
                     RaisedButton(
                       child: Text('Try again'),
                       onPressed: () {
-                        catalogStateRM.setState(
-                          (s) => s.getItems(),
-                        );
-                        Navigator.of(context).pop();
+                        //call getItems again.
+                        catalogStateRM.refresh();
+                        //With states_rebuilder you can navigate without context,
+                        RM.navigator.pop();
                       },
                     )
                   ],
@@ -77,7 +84,6 @@ class _AddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the registered cartState ReactiveModel
     final cartRM = RM.get<CartState>();
-    print('rebuild');
     return FlatButton(
       onPressed: cartRM.state.items.contains(item)
           ? null
@@ -94,7 +100,8 @@ class _AddButton extends StatelessWidget {
               //Notify the global CatalogState ReactiveModel to rebuild.
               RM.get<CatalogState>().notify();
             },
-      splashColor: Theme.of(context).primaryColor,
+      //with states_rebuilder you can get the current them without explicitly using the context
+      splashColor: _theme.primaryColor,
       child: cartRM.state.items.contains(item)
           ? Icon(Icons.check, semanticLabel: 'ADDED')
           : Text('ADD'),
@@ -103,6 +110,9 @@ class _AddButton extends StatelessWidget {
 }
 
 class _MyAppBar extends StatelessWidget {
+  //With states_rebuilder you can navigate without explicitly using the context
+  void _navigateTo() => RM.navigator.pushNamed('/cart');
+
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
@@ -111,7 +121,7 @@ class _MyAppBar extends StatelessWidget {
       actions: [
         IconButton(
           icon: Icon(Icons.shopping_cart),
-          onPressed: () => Navigator.pushNamed(context, '/cart'),
+          onPressed: _navigateTo,
         ),
       ],
     );
@@ -123,10 +133,21 @@ class _MyListItem extends StatelessWidget {
 
   _MyListItem(this.item, {Key key}) : super(key: key);
 
+  //with states_rebuilder you can get the current them without BuildContext
+  final textTheme = _theme.textTheme.headline6;
+
+  void _displaySnackBar() {
+    //with states_rebuilder you can get the active ScaffoldState without
+    // explicitly using the BuildContext
+    RM.scaffold.showSnackBar(
+      SnackBar(
+        content: Text('error.message'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var textTheme = Theme.of(context).textTheme.headline6;
-
     return Dismissible(
       key: Key('${item.id}'),
       onDismissed: (_) {
@@ -139,11 +160,7 @@ class _MyListItem extends StatelessWidget {
           ),
           onError: (context, error) {
             // Display SnackBar
-            Scaffold.of(context).showSnackBar(
-              SnackBar(
-                content: Text('error.message'),
-              ),
-            );
+            _displaySnackBar();
           },
         );
       },
